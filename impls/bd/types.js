@@ -32,4 +32,16 @@ class Vector extends MalValue {
   }
 }
 
-module.exports = { List, Vector, pr_str };
+class NilValue extends MalValue {
+  constructor() {
+    super();
+  }
+
+  pr_str() {
+    return "nil";
+  }
+}
+
+const Nil = new NilValue();
+
+module.exports = { List, Vector, pr_str, Nil };
