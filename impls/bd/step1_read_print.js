@@ -16,8 +16,16 @@ const rep = (str) => PRINT(EVAL(READ(str)));
 
 const loop = () => {
   rl.question("user> ", (str) => {
-    console.log(rep(str));
-    loop();
+    try {
+      console.log(rep(str));
+    }
+    catch (e) {
+      console.log(e.message);
+    }
+    finally {
+      loop();
+    }
+
   })
 }
 
