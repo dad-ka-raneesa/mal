@@ -1,4 +1,13 @@
+const pr_str = (ast) => {
+  if (ast instanceof MalValue)
+    return ast.pr_str();
+  return ast.toString();
+}
+
 class MalValue {
+  pr_str() {
+    return "---Default Mal Value---"
+  }
 }
 
 class List extends MalValue {
@@ -7,8 +16,8 @@ class List extends MalValue {
     this.ast = ast;
   }
 
-  toString() {
-    return '(' + this.ast.map(x => x.toString()).join(' ') + ')';
+  pr_str() {
+    return '(' + this.ast.map(pr_str).join(' ') + ')';
   }
 }
 
@@ -18,9 +27,9 @@ class Vector extends MalValue {
     this.ast = ast;
   }
 
-  toString() {
-    return '[' + this.ast.map(x => x.toString()).join(' ') + ']';
+  pr_str() {
+    return '[' + this.ast.map(pr_str).join(' ') + ']';
   }
 }
 
-module.exports = { List, Vector };
+module.exports = { List, Vector, pr_str };
