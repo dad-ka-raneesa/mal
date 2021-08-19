@@ -42,6 +42,17 @@ class NilValue extends MalValue {
   }
 }
 
+class Str extends MalValue {
+  constructor(string) {
+    super();
+    this.string = string;
+  }
+
+  pr_str() {
+    return '"' + this.string + '"';
+  }
+}
+
 const Nil = new NilValue();
 
-module.exports = { List, Vector, pr_str, Nil };
+module.exports = { List, Vector, Str, pr_str, Nil };
