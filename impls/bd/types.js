@@ -41,6 +41,7 @@ class HashMap extends MalValue {
     super();
     this.ast = ast;
     this.hashMap = new Map();
+    this.initializeHashMap();
   }
 
   initializeHashMap() {
@@ -51,7 +52,6 @@ class HashMap extends MalValue {
 
   pr_str(print_readably = false) {
     let str = [];
-    this.initializeHashMap();
     for (const [key, value] of this.hashMap.entries()) {
       str.push(`${pr_str(key, print_readably)} ${pr_str(value, print_readably)}`)
     }

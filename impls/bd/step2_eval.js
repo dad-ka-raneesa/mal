@@ -1,7 +1,7 @@
 const readline = require('readline');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
-const { List, Vector, MalSymbol } = require('./types');
+const { List, Vector, HashMap, MalSymbol } = require('./types');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -12,12 +12,15 @@ const env = {
   '+': (...args) => args.reduce((a, b) => a + b, 0),
   '*': (...args) => args.reduce((a, b) => a * b, 1),
   '-': (...args) => {
+    if (args.length === 0) throw new Error('Wrong number of args (0) passed to: -');
+    const initialParam = args.length === 1 ? 0 : args[0];
     if (args.length === 1) return 0 - args[0];
-    return args.reduce((a, b) => a - b, args[0])
+    return args.slice(1).reduce((a, b) => a - b, args[0]);
   },
   '/': (...args) => {
+    if (args.length === 0) throw new Error('Wrong number of args (0) passed to: /');
     if (args.length === 1) return 1 / args[0];
-    return args.reduce((a, b) => a / b, args[0])
+    return args.slice(1).reduce((a, b) => a / b, args[0]);
   },
   'pi': Math.PI
 }
@@ -30,12 +33,18 @@ const eval_ast = (ast, env) => {
     throw new Error(`${ast.symbol} symbol not found`)
   }
 
-  if (ast instanceof List) {
+  if (ast instanceof List)
     return new List(ast.ast.map((x) => EVAL(x, env)));
-  }
 
-  if (ast instanceof Vector) {
+  if (ast instanceof Vector)
     return new Vector(ast.ast.map((x) => EVAL(x, env)));
+
+  if (ast instanceof HashMap) {
+    const newAst = [];
+    for (const [key, value] of ast.hashMap.entries()) {
+      newAst.push(EVAL(key, env), EVAL(value, env));
+    }
+    return new HashMap(newAst);
   }
 
   return ast;
@@ -53,8 +62,6 @@ const EVAL = (ast, env) => {
   const [fn, ...args] = eval_ast(ast, env).ast;
 
   if (fn instanceof Function) {
-    if (args.length === 0)
-      throw new Error('Wrong number of args (0) passed');
     return fn.apply(null, args);
   }
 
