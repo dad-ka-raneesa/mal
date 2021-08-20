@@ -17,7 +17,7 @@ class List extends MalValue {
   }
 
   pr_str(print_readably = false) {
-    return '(' + this.ast.map(x => pr_str(x, print_readably)).join(' ') + ')';
+    return `(${this.ast.map(x => pr_str(x, print_readably)).join(' ')})`;
   }
 }
 
@@ -28,7 +28,30 @@ class Vector extends MalValue {
   }
 
   pr_str(print_readably = false) {
-    return '[' + this.ast.map(x => pr_str(x, print_readably)).join(' ') + ']';
+    return `[${this.ast.map(x => pr_str(x, print_readably)).join(' ')}]`;
+  }
+}
+
+class HashMap extends MalValue {
+  constructor(ast) {
+    super();
+    this.ast = ast;
+    this.hashMap = new Map();
+  }
+
+  initializeHashMap() {
+    for (let i = 0; i < this.ast.length; i += 2) {
+      this.hashMap.set(this.ast[i], this.ast[i + 1]);
+    }
+  }
+
+  pr_str(print_readably = false) {
+    let str = [];
+    this.initializeHashMap();
+    for (const [key, value] of this.hashMap.entries()) {
+      str.push(`${pr_str(key, print_readably)} ${pr_str(value, print_readably)}`)
+    }
+    return `{${str.join(', ')}}`;
   }
 }
 
@@ -50,11 +73,11 @@ class Str extends MalValue {
 
   pr_str(print_readably = false) {
     if (print_readably)
-      return '"' + this.string
+      return `"${this.string
         .replace(/\\/g, "\\\\")
         .replace(/"/g, '\\"')
-        .replace(/\n/g, "\\n") + '"';
-    return '"' + this.string + '"';
+        .replace(/\n/g, "\\n")}"`
+    return `"${this.string}"`;
   }
 }
 
@@ -65,7 +88,7 @@ class Keyword extends MalValue {
   }
 
   pr_str(print_readably = false) {
-    return ':' + this.keyword;
+    return `:${this.keyword}`;
   }
 }
 
@@ -82,4 +105,4 @@ class MalSymbol extends MalValue {
 
 const Nil = new NilValue();
 
-module.exports = { List, Vector, Str, Keyword, MalSymbol, pr_str, Nil };
+module.exports = { List, Vector, HashMap, Str, Keyword, MalSymbol, pr_str, Nil };

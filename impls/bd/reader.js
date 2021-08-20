@@ -1,4 +1,4 @@
-const { List, Vector, Str, Keyword, MalSymbol, Nil } = require('./types');
+const { List, Vector, HashMap, Str, Keyword, MalSymbol, Nil } = require('./types');
 
 class Reader {
   constructor(tokens) {
@@ -50,6 +50,9 @@ const read_atom = (reader) => {
     return new Str(str);
   }
 
+  if (token.startsWith('"'))
+    throw new Error('unbalanced "');
+
   return new MalSymbol(token);
 }
 
@@ -77,14 +80,22 @@ const read_vector = (reader) => {
   return new Vector(ast);
 };
 
+const read_hash_map = (reader) => {
+  const ast = read_seq(reader, '}');
+  if (ast.length % 2 !== 0) throw new Error("unbalanced")
+  return new HashMap(ast);
+};
+
 const read_form = (reader) => {
   const token = reader.peek();
 
   switch (token[0]) {
     case '(': return read_list(reader);
     case '[': return read_vector(reader);
+    case '{': return read_hash_map(reader);
     case ')': throw new Error("unexpected )");
     case ']': throw new Error("unexpected ]");
+    case '}': throw new Error("unexpected }");
   }
 
   return read_atom(reader);
