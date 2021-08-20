@@ -1,11 +1,11 @@
-const pr_str = (ast) => {
+const pr_str = (ast, print_readably = false) => {
   if (ast instanceof MalValue)
-    return ast.pr_str();
+    return ast.pr_str(print_readably);
   return ast.toString();
 }
 
 class MalValue {
-  pr_str() {
+  pr_str(print_readably = false) {
     return "---Default Mal Value---"
   }
 }
@@ -16,8 +16,8 @@ class List extends MalValue {
     this.ast = ast;
   }
 
-  pr_str() {
-    return '(' + this.ast.map(pr_str).join(' ') + ')';
+  pr_str(print_readably = false) {
+    return '(' + this.ast.map(x => pr_str(x, print_readably)).join(' ') + ')';
   }
 }
 
@@ -27,8 +27,8 @@ class Vector extends MalValue {
     this.ast = ast;
   }
 
-  pr_str() {
-    return '[' + this.ast.map(pr_str).join(' ') + ']';
+  pr_str(print_readably = false) {
+    return '[' + this.ast.map(x => pr_str(x, print_readably)).join(' ') + ']';
   }
 }
 
@@ -37,7 +37,7 @@ class NilValue extends MalValue {
     super();
   }
 
-  pr_str() {
+  pr_str(print_readably = false) {
     return "nil";
   }
 }
@@ -48,7 +48,12 @@ class Str extends MalValue {
     this.string = string;
   }
 
-  pr_str() {
+  pr_str(print_readably = false) {
+    if (print_readably)
+      return '"' + this.string
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "\\n") + '"';
     return '"' + this.string + '"';
   }
 }
