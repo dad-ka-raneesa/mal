@@ -58,6 +58,28 @@ class Str extends MalValue {
   }
 }
 
+class Keyword extends MalValue {
+  constructor(keyword) {
+    super();
+    this.keyword = keyword;
+  }
+
+  pr_str(print_readably = false) {
+    return ':' + this.keyword;
+  }
+}
+
+class MalSymbol extends MalValue {
+  constructor(symbol) {
+    super();
+    this.symbol = symbol;
+  }
+
+  pr_str(print_readably = false) {
+    return this.symbol;
+  }
+}
+
 const Nil = new NilValue();
 
-module.exports = { List, Vector, Str, pr_str, Nil };
+module.exports = { List, Vector, Str, Keyword, MalSymbol, pr_str, Nil };
