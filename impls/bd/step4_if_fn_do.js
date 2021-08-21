@@ -3,26 +3,13 @@ const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
 const { List, Vector, HashMap, MalSymbol, Nil } = require('./types');
 const Env = require('./env');
+const env = require('./core');
+const { nextTick } = require('process');
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
-
-const env = new Env();
-env.set(new MalSymbol('+'), (...args) => args.reduce((a, b) => a + b, 0));
-env.set(new MalSymbol('*'), (...args) => args.reduce((a, b) => a * b, 1));
-env.set(new MalSymbol('-'), (...args) => {
-  if (args.length === 0) throw new Error('Wrong number of args (0) passed to: -');
-  if (args.length === 1) return 0 - args[0];
-  return args.slice(1).reduce((a, b) => a - b, args[0]);
-});
-env.set(new MalSymbol('/'), (...args) => {
-  if (args.length === 0) throw new Error('Wrong number of args (0) passed to: /');
-  if (args.length === 1) return 1 / args[0];
-  return args.slice(1).reduce((a, b) => a / b, args[0]);
-});
-env.set(new MalSymbol('pi'), Math.PI);
 
 const eval_ast = (ast, env) => {
   if (ast instanceof MalSymbol)
@@ -48,6 +35,7 @@ const eval_ast = (ast, env) => {
 const READ = (str) => read_str(str);
 
 const EVAL = (ast, env) => {
+  if (ast === undefined) return Nil;
   if (!(ast instanceof List))
     return eval_ast(ast, env);
 
@@ -99,6 +87,8 @@ const EVAL = (ast, env) => {
 const PRINT = (ast) => pr_str(ast, true);
 
 const rep = (str) => PRINT(EVAL(READ(str), env));
+
+rep('(def! not (fn* (a) (if a false true)))');
 
 const loop = () => {
   rl.question("user> ", (str) => {

@@ -33,9 +33,17 @@ class Env {
 
   static createEnv(outer = null, binds = [], exprs = []) {
     const env = new Env(outer);
-    binds.forEach((sym, i) => {
-      env.set(sym, exprs[i]);
-    })
+    for (let i = 0; i < binds.length; i++) {
+      const key = binds[i];
+      const value = exprs[i];
+      if (key.symbol === '&') {
+        env.set(binds[i + 1], exprs.slice(i));
+        break;
+      }
+      if (value === undefined) throw new Error(`No value provided for '${print_str(key)}'`);
+      env.set(key, value);
+
+    }
     return env;
   }
 }

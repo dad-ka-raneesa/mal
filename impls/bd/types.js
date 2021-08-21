@@ -4,9 +4,29 @@ const pr_str = (ast, print_readably = false) => {
   return ast.toString();
 }
 
+const isEqual = (...args) => {
+  const firstElement = args[0];
+  let comparator = (x) => x === firstElement;
+  if (firstElement instanceof MalValue) comparator = (x) => firstElement.isEqual(x);
+
+  return args.slice(1).every(comparator);
+};
+
 class MalValue {
   pr_str(print_readably = false) {
     return "---Default Mal Value---"
+  }
+
+  isEmpty() {
+    return false;
+  }
+
+  count() {
+    return 0;
+  }
+
+  isEqual(other) {
+    return false;
   }
 }
 
@@ -23,6 +43,18 @@ class List extends MalValue {
   isEmpty() {
     return this.ast.length === 0;
   }
+
+  count() {
+    return this.ast.length;
+  }
+
+  isEqual(other) {
+    if ((!(other instanceof List) && !(other instanceof Vector)) || other.count() !== this.count()) {
+      return false;
+    }
+
+    return this.ast.every((val, i) => isEqual(val, other.ast[i]))
+  }
 }
 
 class Vector extends MalValue {
@@ -33,6 +65,22 @@ class Vector extends MalValue {
 
   pr_str(print_readably = false) {
     return `[${this.ast.map(x => pr_str(x, print_readably)).join(' ')}]`;
+  }
+
+  isEmpty() {
+    return this.ast.length === 0;
+  }
+
+  count() {
+    return this.ast.length;
+  }
+
+  isEqual(other) {
+    if ((!(other instanceof List) && !(other instanceof Vector)) || other.count() !== this.count()) {
+      return false;
+    }
+
+    return this.ast.every((val, i) => isEqual(val, other.ast[i]))
   }
 }
 
@@ -57,6 +105,22 @@ class HashMap extends MalValue {
     }
     return `{${str.join(', ')}}`;
   }
+
+  isEmpty() {
+    return this.hashMap.isEmpty();
+  }
+
+  count() {
+    return this.hashMap.size;
+  }
+
+  isEqual(other) {
+    if (other instanceof HashMap && other.hashmap.size == this.hashmap.size) {
+      const keys = [...this.hashmap.keys()];
+      return keys.every(key => isEqual(this.hashmap.get(key), other.hashmap.get(key)));
+    }
+    return false;
+  }
 }
 
 class NilValue extends MalValue {
@@ -66,6 +130,18 @@ class NilValue extends MalValue {
 
   pr_str(print_readably = false) {
     return "nil";
+  }
+
+  isEmpty() {
+    return true;
+  }
+
+  count() {
+    return 0;
+  }
+
+  isEqual(other) {
+    return (other instanceof NilValue);
   }
 }
 
@@ -81,7 +157,19 @@ class Str extends MalValue {
         .replace(/\\/g, "\\\\")
         .replace(/"/g, '\\"')
         .replace(/\n/g, "\\n")}"`
-    return `"${this.string}"`;
+    return this.string;
+  }
+
+  isEmpty() {
+    return this.string.length === 0;
+  }
+
+  count() {
+    return this.string.length;
+  }
+
+  isEqual(other) {
+    return (other instanceof Str) && this.string === other.string;
   }
 }
 
@@ -94,6 +182,18 @@ class Keyword extends MalValue {
   pr_str(print_readably = false) {
     return `:${this.keyword}`;
   }
+
+  isEmpty() {
+    throw new Error(`Cannot check 'empty?' for :${this.keyword}`)
+  }
+
+  count() {
+    throw new Error(`Cannot check 'count' for :${this.keyword}`)
+  }
+
+  isEqual(other) {
+    return (other instanceof Keyword) && this.keyword === other.keyword;
+  }
 }
 
 class MalSymbol extends MalValue {
@@ -105,8 +205,20 @@ class MalSymbol extends MalValue {
   pr_str(print_readably = false) {
     return this.symbol;
   }
+
+  isEmpty() {
+    throw new Error(`Cannot check 'empty?' for ${this.symbol}`)
+  }
+
+  count() {
+    throw new Error(`Cannot check 'count' for ${this.symbol}`)
+  }
+
+  isEqual(other) {
+    return (other instanceof MalSymbol) && this.symbol === other.symbol;
+  }
 }
 
 const Nil = new NilValue();
 
-module.exports = { List, Vector, HashMap, Str, Keyword, MalSymbol, pr_str, Nil };
+module.exports = { MalValue, List, Vector, HashMap, Str, Keyword, MalSymbol, pr_str, Nil, isEqual };
