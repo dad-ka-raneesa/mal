@@ -30,6 +30,14 @@ class Env {
 
     return env.data.get(key.symbol);
   }
+
+  static createEnv(outer = null, binds = [], exprs = []) {
+    const env = new Env(outer);
+    binds.forEach((sym, i) => {
+      env.set(sym, exprs[i]);
+    })
+    return env;
+  }
 }
 
 module.exports = Env;
