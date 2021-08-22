@@ -4,7 +4,6 @@ const { pr_str } = require('./printer');
 const { List, Vector, HashMap, MalSymbol, Nil } = require('./types');
 const Env = require('./env');
 const env = require('./core');
-const { nextTick } = require('process');
 
 const rl = readline.createInterface({
   input: process.stdin,

@@ -219,6 +219,31 @@ class MalSymbol extends MalValue {
   }
 }
 
+class MalFunction extends MalValue {
+  constructor(ast, binds, env) {
+    super();
+    this.ast = ast;
+    this.binds = binds;
+    this.env = env;
+  }
+
+  print_str(print_readably = false) {
+    return '#<function>';
+  }
+
+  isEmpty() {
+    throw new Error(`Cannot check 'empty?' for function`);
+  }
+
+  count() {
+    throw new Error(`Cannot check 'count' for function`);
+  }
+
+  isEqual(other) {
+    throw new Error(`Cannot check '=' for function`);
+  }
+}
+
 const Nil = new NilValue();
 
-module.exports = { MalValue, List, Vector, HashMap, Str, Keyword, MalSymbol, pr_str, Nil, isEqual };
+module.exports = { MalValue, List, Vector, HashMap, Str, Keyword, MalSymbol, pr_str, Nil, isEqual, MalFunction };
