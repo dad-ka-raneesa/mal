@@ -220,14 +220,15 @@ class MalSymbol extends MalValue {
 }
 
 class MalFunction extends MalValue {
-  constructor(ast, binds, env) {
+  constructor(ast, binds, env, func) {
     super();
     this.ast = ast;
     this.binds = binds;
     this.env = env;
+    this.func = func;
   }
 
-  print_str(print_readably = false) {
+  pr_str(print_readably = false) {
     return '#<function>';
   }
 
@@ -242,8 +243,39 @@ class MalFunction extends MalValue {
   isEqual(other) {
     throw new Error(`Cannot check '=' for function`);
   }
+
+  apply(fstArg, args) {
+    return this.func.apply(fstArg, args);
+  }
+}
+
+class Atom extends MalValue {
+  constructor(malValue) {
+    super();
+    this.malValue = malValue;
+  }
+
+  updateValue(malValue) {
+    return this.malValue = malValue;
+  }
+
+  pr_str(print_readably = false) {
+    return `(atom ${pr_str(this.malValue)})`;
+  }
+
+  isEmpty() {
+    throw new Error(`Cannot check 'empty?' for atom`);
+  }
+
+  count() {
+    throw new Error(`Cannot check 'count' for atom`);
+  }
+
+  isEqual(other) {
+    return (other instanceof Atom) && isEqual(this.malValue, other.malValue);
+  }
 }
 
 const Nil = new NilValue();
 
-module.exports = { MalValue, List, Vector, HashMap, Str, Keyword, MalSymbol, pr_str, Nil, isEqual, MalFunction };
+module.exports = { MalValue, List, Vector, HashMap, Str, Keyword, MalSymbol, Atom, pr_str, Nil, isEqual, MalFunction };

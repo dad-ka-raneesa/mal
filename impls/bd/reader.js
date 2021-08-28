@@ -21,6 +21,7 @@ const tokenize = (str) => {
   const regEx = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/g;
   return [...str.matchAll(regEx)]
     .map(x => x[1])
+    .filter(x => x[0] != ';')
     .slice(0, -1);
 }
 
@@ -89,6 +90,8 @@ const read_hash_map = (reader) => {
 const read_form = (reader) => {
   const token = reader.peek();
 
+  if (token === undefined) return Nil;
+
   switch (token[0]) {
     case '(': return read_list(reader);
     case '[': return read_vector(reader);
@@ -96,6 +99,9 @@ const read_form = (reader) => {
     case ')': throw new Error("unexpected )");
     case ']': throw new Error("unexpected ]");
     case '}': throw new Error("unexpected }");
+    case '@':
+      reader.next();
+      return new List([new MalSymbol('deref'), read_form(reader)]);
   }
 
   return read_atom(reader);

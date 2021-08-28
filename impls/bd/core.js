@@ -2,7 +2,7 @@ const fs = require('fs');
 const Env = require('./env');
 const { pr_str } = require('./printer');
 const { read_str } = require('./reader');
-const { MalValue, MalSymbol, List, Str, Nil, isEqual } = require('./types');
+const { MalValue, MalSymbol, List, Str, Atom, Nil, isEqual } = require('./types');
 
 const add = (...args) => args.reduce((a, b) => a + b, 0);
 
@@ -84,8 +84,33 @@ const slurp = (ast) => {
   catch (e) {
     throw new Error(e.message);
   }
-  return;
 };
+
+const createAtom = (ast) => {
+  return new Atom(ast);
+}
+
+const isAtom = (ast) => {
+  return ast instanceof Atom;
+}
+
+const derefAtom = (ast) => {
+  if (!(ast instanceof Atom))
+    throw new Error("Not an atom");
+  return ast.malValue;
+}
+
+const resetAtom = (ast, malValue) => {
+  if (!(ast instanceof Atom))
+    throw new Error("Not an atom");
+  return ast.updateValue(malValue);
+}
+
+const swapAtom = (ast, func, ...args) => {
+  if (!(ast instanceof Atom))
+    throw new Error("Not an atom");
+  return ast.updateValue(func.apply(null, [ast.malValue, ...args]));
+}
 
 const env = new Env(null);
 
@@ -109,5 +134,10 @@ env.set(new MalSymbol('>'), isGreater);
 env.set(new MalSymbol('>='), isGreaterOrEqual);
 env.set(new MalSymbol('read-string'), readString);
 env.set(new MalSymbol('slurp'), slurp);
+env.set(new MalSymbol('atom'), createAtom);
+env.set(new MalSymbol('atom?'), isAtom);
+env.set(new MalSymbol('deref'), derefAtom);
+env.set(new MalSymbol('reset!'), resetAtom);
+env.set(new MalSymbol('swap!'), swapAtom);
 
 module.exports = env;

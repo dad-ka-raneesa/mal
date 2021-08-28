@@ -1,11 +1,12 @@
 const readline = require('readline');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
-const { List, Vector, HashMap, MalSymbol, Nil, MalFunction } = require('./types');
+const { List, Vector, HashMap, MalSymbol, Nil, Str, MalFunction } = require('./types');
 const Env = require('./env');
 const env = require('./core');
 
 env.set(new MalSymbol('eval'), (ast) => EVAL(ast, env));
+env.set(new MalSymbol('*ARGV*'), new List(process.argv.slice(3).map(x => new Str(x))));
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -78,7 +79,11 @@ const EVAL = (ast, env) => {
         continue;
 
       case 'fn*':
-        return new MalFunction(ast.ast[2], ast.ast[1].ast, env);
+        const func = function(...exprs) {
+          const newEnv = Env.createEnv(env, ast.ast[1].ast, exprs);
+          return EVAL(ast.ast[2], newEnv);
+        }
+        return new MalFunction(ast.ast[2], ast.ast[1].ast, env, func);
     }
 
     const [fn, ...args] = eval_ast(ast, env).ast;
@@ -115,8 +120,19 @@ const loop = () => {
     finally {
       loop();
     }
-
   })
 }
 
-loop();
+const loadFile = () => {
+  try {
+    rep(`(load-file "${process.argv[2]}")`);
+  }
+  catch (e) {
+    console.log(e.message);
+  }
+  finally {
+    process.exit(0);
+  }
+};
+
+process.argv.length > 2 ? loadFile() : loop();
