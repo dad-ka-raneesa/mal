@@ -1,5 +1,7 @@
+const fs = require('fs');
 const Env = require('./env');
 const { pr_str } = require('./printer');
+const { read_str } = require('./reader');
 const { MalValue, MalSymbol, List, Str, Nil, isEqual } = require('./types');
 
 const add = (...args) => args.reduce((a, b) => a + b, 0);
@@ -68,6 +70,23 @@ const isGreaterOrEqual = (...args) => {
   return args.reduce((a, b) => a >= b);
 };
 
+const readString = (ast) => {
+  if (!ast instanceof Str) {
+    throw new Error("Given value is not in string format");
+  }
+  return read_str(ast.pr_str());
+}
+
+const slurp = (ast) => {
+  try {
+    return new Str(fs.readFileSync(ast.pr_str(), 'utf-8'));
+  }
+  catch (e) {
+    throw new Error(e.message);
+  }
+  return;
+};
+
 const env = new Env(null);
 
 env.set(new MalSymbol('+'), add);
@@ -88,5 +107,7 @@ env.set(new MalSymbol('<'), isLesser);
 env.set(new MalSymbol('<='), isLesserOrEqual);
 env.set(new MalSymbol('>'), isGreater);
 env.set(new MalSymbol('>='), isGreaterOrEqual);
+env.set(new MalSymbol('read-string'), readString);
+env.set(new MalSymbol('slurp'), slurp);
 
 module.exports = env;
