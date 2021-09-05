@@ -30,14 +30,14 @@ class MalValue {
   }
 }
 
-class List extends MalValue {
+class MalSequence extends MalValue {
   constructor(ast) {
     super();
     this.ast = ast;
   }
 
   pr_str(print_readably = false) {
-    return `(${this.ast.map(x => pr_str(x, print_readably)).join(' ')})`;
+    return "---Default Mal Sequence---"
   }
 
   isEmpty() {
@@ -49,7 +49,7 @@ class List extends MalValue {
   }
 
   isEqual(other) {
-    if ((!(other instanceof List) && !(other instanceof Vector)) || other.count() !== this.count()) {
+    if (!(other instanceof MalSequence) || other.count() !== this.count()) {
       return false;
     }
 
@@ -57,30 +57,23 @@ class List extends MalValue {
   }
 }
 
-class Vector extends MalValue {
+class List extends MalSequence {
   constructor(ast) {
-    super();
-    this.ast = ast;
+    super(ast);
+  }
+
+  pr_str(print_readably = false) {
+    return `(${this.ast.map(x => pr_str(x, print_readably)).join(' ')})`;
+  }
+}
+
+class Vector extends MalSequence {
+  constructor(ast) {
+    super(ast);
   }
 
   pr_str(print_readably = false) {
     return `[${this.ast.map(x => pr_str(x, print_readably)).join(' ')}]`;
-  }
-
-  isEmpty() {
-    return this.ast.length === 0;
-  }
-
-  count() {
-    return this.ast.length;
-  }
-
-  isEqual(other) {
-    if ((!(other instanceof List) && !(other instanceof Vector)) || other.count() !== this.count()) {
-      return false;
-    }
-
-    return this.ast.every((val, i) => isEqual(val, other.ast[i]))
   }
 }
 
@@ -278,4 +271,4 @@ class Atom extends MalValue {
 
 const Nil = new NilValue();
 
-module.exports = { MalValue, List, Vector, HashMap, Str, Keyword, MalSymbol, Atom, pr_str, Nil, isEqual, MalFunction };
+module.exports = { MalValue, List, Vector, HashMap, Str, Keyword, MalSymbol, Atom, MalSequence, pr_str, Nil, isEqual, MalFunction };

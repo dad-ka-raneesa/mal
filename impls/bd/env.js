@@ -1,4 +1,4 @@
-const { MalSymbol } = require('./types');
+const { MalSymbol, List } = require('./types');
 
 class Env {
   constructor(outer = null) {
@@ -37,7 +37,7 @@ class Env {
       const key = binds[i];
       const value = exprs[i];
       if (key.symbol === '&') {
-        env.set(binds[i + 1], exprs.slice(i));
+        env.set(binds[i + 1], new List(exprs.slice(i)));
         break;
       }
       if (value === undefined) throw new Error(`No value provided for '${print_str(key)}'`);

@@ -2,7 +2,7 @@ const fs = require('fs');
 const Env = require('./env');
 const { pr_str } = require('./printer');
 const { read_str } = require('./reader');
-const { MalValue, MalSymbol, List, Str, Atom, Nil, isEqual } = require('./types');
+const { MalValue, MalSymbol, List, Str, Atom, MalSequence, Nil, isEqual } = require('./types');
 
 const add = (...args) => args.reduce((a, b) => a + b, 0);
 
@@ -36,7 +36,7 @@ const printStr = (...args) => new Str(args.map(x => pr_str(x, true)).join(' '));
 
 const list = (...args) => new List(args);
 
-const isList = (list) => (list instanceof List) || (Array.isArray(list));
+const isList = (list) => list instanceof List;
 
 const isEmpty = (ast) => {
   if (ast instanceof MalValue) return ast.isEmpty();
@@ -112,6 +112,20 @@ const swapAtom = (ast, func, ...args) => {
   return ast.updateValue(func.apply(null, [ast.malValue, ...args]));
 }
 
+const cons = (firstParam, ast) => {
+  if (!(ast instanceof MalSequence))
+    throw new Error("Not an List or Vector");
+  return new List([firstParam, ...ast.ast]);
+}
+
+const concat = (...args) => {
+  return args.reduce((initialValue, ast) => {
+    if (!(ast instanceof MalSequence))
+      throw new Error("Not an List or Vector");
+    return new List([...initialValue.ast, ...ast.ast]);
+  }, new List([]));
+}
+
 const env = new Env(null);
 
 env.set(new MalSymbol('+'), add);
@@ -139,5 +153,7 @@ env.set(new MalSymbol('atom?'), isAtom);
 env.set(new MalSymbol('deref'), derefAtom);
 env.set(new MalSymbol('reset!'), resetAtom);
 env.set(new MalSymbol('swap!'), swapAtom);
+env.set(new MalSymbol('cons'), cons);
+env.set(new MalSymbol('concat'), concat);
 
 module.exports = env;
