@@ -87,21 +87,28 @@ const read_hash_map = (reader) => {
   return new HashMap(ast);
 };
 
+const prependSymbol = (value, reader) => {
+  reader.next();
+  return new List([new MalSymbol(value), read_form(reader)]);
+}
+
 const read_form = (reader) => {
   const token = reader.peek();
 
   if (token === undefined) return Nil;
 
-  switch (token[0]) {
+  switch (token) {
     case '(': return read_list(reader);
     case '[': return read_vector(reader);
     case '{': return read_hash_map(reader);
     case ')': throw new Error("unexpected )");
     case ']': throw new Error("unexpected ]");
     case '}': throw new Error("unexpected }");
-    case '@':
-      reader.next();
-      return new List([new MalSymbol('deref'), read_form(reader)]);
+    case '@': return prependSymbol('deref', reader);
+    case '\'': return prependSymbol('quote', reader);
+    case '`': return prependSymbol('quasiquote', reader);
+    case '~': return prependSymbol('unquote', reader);
+    case '~@': return prependSymbol('splice-unquote', reader);
   }
 
   return read_atom(reader);

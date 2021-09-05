@@ -2,7 +2,7 @@ const fs = require('fs');
 const Env = require('./env');
 const { pr_str } = require('./printer');
 const { read_str } = require('./reader');
-const { MalValue, MalSymbol, List, Str, Atom, MalSequence, Nil, isEqual } = require('./types');
+const { MalValue, MalSymbol, List, Str, Atom, MalSequence, Vector, Nil, isEqual } = require('./types');
 
 const add = (...args) => args.reduce((a, b) => a + b, 0);
 
@@ -126,6 +126,12 @@ const concat = (...args) => {
   }, new List([]));
 }
 
+const vec = (ast) => {
+  if (!(ast instanceof MalSequence))
+    throw new Error("Not an List or Vector");
+  return new Vector([...ast.ast]);
+}
+
 const env = new Env(null);
 
 env.set(new MalSymbol('+'), add);
@@ -155,5 +161,6 @@ env.set(new MalSymbol('reset!'), resetAtom);
 env.set(new MalSymbol('swap!'), swapAtom);
 env.set(new MalSymbol('cons'), cons);
 env.set(new MalSymbol('concat'), concat);
+env.set(new MalSymbol('vec'), vec);
 
 module.exports = env;

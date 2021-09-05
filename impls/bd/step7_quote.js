@@ -36,6 +36,34 @@ const eval_ast = (ast, env) => {
 
 const READ = (str) => read_str(str);
 
+const populate = (arg) => {
+  let result = new List([]);
+  for (let i = arg.ast.length - 1; i >= 0; i--) {
+    let elt = arg.ast[i];
+    if (elt instanceof List && elt.ast[0] instanceof MalSymbol && elt.ast[0].symbol == 'splice-unquote') {
+      result = new List([new MalSymbol('concat'), elt.ast[1], result]);
+    }
+    else {
+      result = new List([new MalSymbol('cons'), quasiquote(elt), result]);
+    }
+  }
+  return result;
+}
+
+const quasiquote = (arg) => {
+  if (arg instanceof List) {
+    if (arg.ast[0] instanceof MalSymbol && arg.ast[0].symbol == 'unquote') {
+      return arg.ast[1];
+    }
+    return populate(arg);
+  }
+  if (arg instanceof HashMap || arg instanceof MalSymbol)
+    return new List([new MalSymbol('quote'), arg]);
+  if (arg instanceof Vector)
+    return new List([new MalSymbol('vec'), populate(arg)]);
+  return arg;
+}
+
 const EVAL = (ast, env) => {
   while (true) {
     if (ast === undefined) return Nil;
@@ -84,6 +112,16 @@ const EVAL = (ast, env) => {
           return EVAL(ast.ast[2], newEnv);
         }
         return new MalFunction(ast.ast[2], ast.ast[1].ast, env, func);
+
+      case 'quote':
+        return ast.ast[1];
+
+      case 'quasiquote':
+        ast = quasiquote(ast.ast[1]);
+        continue;
+
+      case 'quasiquoteexpand':
+        return quasiquote(ast.ast[1]);
     }
 
     const [fn, ...args] = eval_ast(ast, env).ast;
