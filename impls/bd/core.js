@@ -132,6 +132,23 @@ const vec = (ast) => {
   return new Vector([...ast.ast]);
 }
 
+const nth = (list, index) => {
+  if (!(list instanceof MalSequence)) throw new Error("Not an List or Vector");
+  return list.nth(index);
+};
+
+const first = (list) => {
+  if (list === Nil) return Nil;
+  if (!(list instanceof MalSequence)) throw new Error("Not an List or Vector");
+  return list.nth(0);
+};
+
+const rest = (list) => {
+  if (list === Nil) return new List([]);
+  if (!(list instanceof MalSequence)) throw new Error("Not an List or Vector");
+  return list.rest(0);
+};
+
 const env = new Env(null);
 
 env.set(new MalSymbol('+'), add);
@@ -162,5 +179,8 @@ env.set(new MalSymbol('swap!'), swapAtom);
 env.set(new MalSymbol('cons'), cons);
 env.set(new MalSymbol('concat'), concat);
 env.set(new MalSymbol('vec'), vec);
+env.set(new MalSymbol('nth'), nth);
+env.set(new MalSymbol('first'), first);
+env.set(new MalSymbol('rest'), rest);
 
 module.exports = env;

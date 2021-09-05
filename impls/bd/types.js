@@ -55,6 +55,18 @@ class MalSequence extends MalValue {
 
     return this.ast.every((val, i) => isEqual(val, other.ast[i]))
   }
+
+  nth(index = -1) {
+    if (this.isEmpty()) return Nil;
+    if (index < 0 || index >= this.ast.length)
+      throw new Error(`nth: ${index} - index out of range`);
+    return this.ast[index];
+  }
+
+  rest(index = -1) {
+    if (this.isEmpty()) return new List([]);
+    return new List(this.ast.filter((_, i) => i !== index));
+  }
 }
 
 class List extends MalSequence {
@@ -213,12 +225,17 @@ class MalSymbol extends MalValue {
 }
 
 class MalFunction extends MalValue {
-  constructor(ast, binds, env, func) {
+  constructor(ast, binds, env, func, isMacro = false) {
     super();
     this.ast = ast;
     this.binds = binds;
     this.env = env;
     this.func = func;
+    this.isMacro = isMacro;
+  }
+
+  setIsMacro(value) {
+    return this.isMacro = value;
   }
 
   pr_str(print_readably = false) {
